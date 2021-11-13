@@ -31,15 +31,15 @@
       href="/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css"
     />
     <link rel="stylesheet" href="/assets/styles/tailwind.css" />
-    <title>Fun Fee</title>
+    <title>Notus Svelte</title>
 
     <script>
       if (process === undefined) {
-        var process = { env: {} };
+        var process = { env: {PRODUCTION: true} };
       }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
-    <script defer src="/build/bundle.js"></script>
+    <script defer src="/notus-svelte/build/bundle.js"></script>
   </head>
 
   <body class="text-blueGray-700 antialiased">
