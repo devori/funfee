@@ -8,8 +8,9 @@
     list = rates.sort((r1, r2) => ((r1.rate < r2.rate) ? -1 : 1) * (sortAsc ? 1 : -1))
 
   async function refresh() {
-    const { data } = await axios.get('https://xrmxuo2hf1.execute-api.ap-northeast-2.amazonaws.com/prod/funding_rates');
-    rates = data.body;
+    const { data: { body } } = await axios.get('https://xrmxuo2hf1.execute-api.ap-northeast-2.amazonaws.com/prod/funding_rates');
+    const lastTime = body.reduce((v, { time }) => v > time ? v : time, '');
+    rates = body.filter(({ time }) => time === lastTime);
   }
 
   refresh();
@@ -37,18 +38,18 @@
       <thead>
         <tr>
           <th
-            class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
           >
             Market
           </th>
           <th
-            class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
             on:click={() => sortAsc = !sortAsc}
           >
             Rate
           </th>
           <th
-            class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
           >
             Time
           </th>
@@ -58,7 +59,7 @@
       {#each list as { future, rate, time }}
         <tr>
           <th
-            class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
+            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
           >
             <span
               class="ml-3 font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'}"
@@ -67,14 +68,14 @@
             </span>
           </th>
           <td
-            class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
           >
             { (rate * 100).toFixed(4) }%
           </td>
           <td
-            class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
           >
-            { new Date(time).toLocaleString() }
+            { new Date(time).toLocaleTimeString() }
           </td>
         </tr>
       {/each}
