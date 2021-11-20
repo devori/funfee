@@ -68,12 +68,7 @@
         <thead>
         <tr>
           <th
-              class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-          >
-            Market
-          </th>
-          <th
-              class="px-3 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+              class="px-1 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-semibold {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
           >
             FTX -> Upbit
           </th>
@@ -82,37 +77,31 @@
         <tbody>
         {#each ftxToUpbitList as { coin, usd, krw, ftxToUpbit }}
           <tr>
-            <th
-                class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
-            >
-            <span
-                class="ml-3 font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'}"
-            >
-              { coin }
-            </span>
-            </th>
             <td
-                class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+                class="border-t-0 px-1 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap py-2"
             >
-              { ftxToUpbit } ({ usd.ask }, { krw.bid })
+              <div
+                  class="ml-3 flex font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'} flex justify-center"
+              >
+                { coin } ({ ftxToUpbit })
+              </div>
+              <div>
+                <div class="flex justify-center">$ { usd.ask.toFixed(4) }</div>
+                <div class="flex justify-center">₩ { krw.bid }</div>
+              </div>
             </td>
           </tr>
         {/each}
         </tbody>
       </table>
     </div>
-    <div class="block w-full overflow-x-auto ml-3">
+    <div class="block w-full overflow-x-auto ml-1">
       <!-- Projects table -->
       <table class="items-center w-full bg-transparent border-collapse">
         <thead>
         <tr>
           <th
-              class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-          >
-            Market
-          </th>
-          <th
-              class="px-3 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+              class="px-1 align-middle border border-solid py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-semibold {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
           >
             Upbit -> FTX
           </th>
@@ -121,19 +110,18 @@
         <tbody>
         {#each upbitToFtxList as { coin, usd, krw, upbitToFtx }}
           <tr>
-            <th
-                class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
-            >
-            <span
-                class="ml-3 font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'}"
-            >
-              { coin }
-            </span>
-            </th>
             <td
-                class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+                class="border-t-0 px-1 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap py-2"
             >
-              { upbitToFtx } ({ usd.bid }, { krw.ask })
+              <div
+                  class="ml-3 flex font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'} flex justify-center"
+              >
+                { coin } ({ upbitToFtx })
+              </div>
+              <div>
+                <div class="flex justify-center">$ { usd.bid.toFixed(4) }</div>
+                <div class="flex justify-center">₩ { krw.ask }</div>
+              </div>
             </td>
           </tr>
         {/each}
