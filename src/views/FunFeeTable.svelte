@@ -1,5 +1,5 @@
 <script>
-  import axios from 'axios';
+  import {getRates} from "../apis/ftx-api";
 
   let rates = [];
   let sortAsc = false;
@@ -8,9 +8,9 @@
     list = rates.sort((r1, r2) => ((r1.rate < r2.rate) ? -1 : 1) * (sortAsc ? 1 : -1))
 
   async function refresh() {
-    const { data: { body } } = await axios.get('https://xrmxuo2hf1.execute-api.ap-northeast-2.amazonaws.com/prod/funding_rates');
-    const lastTime = body.reduce((v, { time }) => v > time ? v : time, '');
-    rates = body.filter(({ time }) => time === lastTime);
+    const data = await getRates();
+    const lastTime = data.reduce((v, { time }) => v > time ? v : time, '');
+    rates = data.filter(({ time }) => time === lastTime);
   }
 
   refresh();
