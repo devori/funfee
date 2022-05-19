@@ -2,6 +2,15 @@ import axios from 'axios';
 
 const BASE_URL = 'https://xrmxuo2hf1.execute-api.ap-northeast-2.amazonaws.com/prod';
 
+export async function getFutures() {
+  const { data: { body: { result } } } = await axios.post(`${BASE_URL}/proxy`, {
+    market: 'ftx',
+    method: 'get',
+    path: '/futures',
+  });
+  return result.filter(({ type, expired }) => type === 'perpetual' && !expired).map(({ ask, bid, underlying, volumeUsd24h }) => ({ ask, bid, name: underlying, volume: volumeUsd24h }));
+}
+
 export async function getRates() {
   const { data: { body } } = await axios.get(`${BASE_URL}/funding_rates`);
   return body;
