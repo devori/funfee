@@ -1,0 +1,1 @@
+require('./bybit-api').handler().then((r) => console.log(JSON.stringify(r)))
