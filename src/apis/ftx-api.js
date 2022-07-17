@@ -12,7 +12,7 @@ export async function getFutures() {
 }
 
 export async function getRates() {
-  const { data: { body } } = await axios.get(`${BASE_URL}/funding_rates`);
+  const { data: { body } } = await axios.get(`${BASE_URL}/ftx/funding-rates`);
   return body;
 }
 

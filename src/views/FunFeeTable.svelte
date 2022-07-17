@@ -1,32 +1,49 @@
 <script>
-  import {getRates} from "../apis/ftx-api";
+  import {getRates as getRatesForFtx} from "../apis/ftx-api";
+  import {getRates as getRatesForBybit} from "../apis/bybit-api";
 
+  export let id;
+  export let color = "light";
+
+  const stores = [
+    { value: 'ftx', text: 'FTX' },
+    { value: 'bybit', text: 'Bybit' },
+  ];
   let rates = [];
-  let sortBy = { direction: false, by: 'rate' };
+  let sortBy = { asc: false, time: '' };
 
-  $:
-    list = rates.sort((r1, r2) => ((r1[sortBy.by] < r2[sortBy.by]) ? -1 : 1) * (sortBy.direction ? 1 : -1));
+  $: list = rates.sort((r1, r2) => {
+    const direction = sortBy.asc ? 1 : -1;
+    if (sortBy.time !== r1.time) return 1;
+    if (sortBy.time !== r2.time) return -1;
+    return (r1.rate - r2.rate) * direction;
+  });
+  $: times = [...new Set(rates.map(({ time }) => time))].sort((t1, t2) => t1 < t2 ? -1 : 1);
 
-  function onClickSort(by) {
-    sortBy = { by, direction: sortBy.by === by ? !sortBy.direction : false };
+  function onClickSortByTime(time) {
+    sortBy = { time, asc: sortBy.time === time ? !sortBy.asc : false };
   }
 
   async function refresh() {
-    const data = await getRates();
-    const lastTime = data.reduce((v, { time }) => v > time ? v : time, '');
-    rates = data.filter(({ future, time }) => future.endsWith('-PERP') && time === lastTime).map((row) => ({
-      ...row,
-      future: row.future.replace('-PERP', ''),
-      accum1: row.history.slice(0, 24).reduce((sum, { rate }) => sum + rate, 0),
-      accum3: row.history.slice(0, 24 * 3).reduce((sum, { rate }) => sum + rate, 0),
-      accum7: row.history.slice(0, 24 * 7).reduce((sum, { rate }) => sum + rate, 0),
-      accum14: row.history.slice(0, 24 * 14).reduce((sum, { rate }) => sum + rate, 0),
-    }));
+    switch (id) {
+      case 'ftx':
+        rates = (await getRatesForFtx()).filter((r) => r.future.endsWith('-PERP')).map((r) => ({ ...r, future: r.future.replace('-PERP', '') }));
+        break;
+      case 'bybit':
+        rates = (await getRatesForBybit()).map((r) => ({ ...r, future: r.future.replace('USDT', '') }));
+        break;
+      default:
+        break;
+    }
+    await Promise.resolve();
+    onClickSortByTime(times?.[0] ?? ''); 
   }
 
   refresh();
-
-  export let color = "light";
+  
+  const onChangeStore = ({ target: { value } }) => {
+    location.href = `/funfee/${value}`;
+  };
 </script>
 
 <div
@@ -41,6 +58,12 @@
           FTX Funding Rates
         </h3>
       </div>
+      <select bind:value="{id}" on:change="{onChangeStore}">
+        <option value="">Select</option>
+        {#each stores as s}
+          <option value="{s.value}">{s.text}</option>
+        {/each}
+      </select>
     </div>
   </div>
   <div class="block w-full overflow-x-auto">
@@ -53,40 +76,18 @@
           >
             Market
           </th>
+          {#each times as t}
           <th
             class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-            on:click={() => onClickSort('rate')}
+            on:click={() => onClickSortByTime(t)}
           >
-            { list[0] ? new Date(list[0]?.time).toLocaleTimeString() : '시간' }
+          { new Date(t).toLocaleTimeString() }
           </th>
-          <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-            on:click={() => onClickSort('accum1')}
-          >
-            누적(1일)
-          </th>
-          <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-            on:click={() => onClickSort('accum3')}
-          >
-            누적(3일)
-          </th>
-          <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-            on:click={() => onClickSort('accum7')}
-          >
-            누적(7일)
-          </th>
-          <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-            on:click={() => onClickSort('accum14')}
-          >
-            누적(14일)
-          </th>
+          {/each}
         </tr>
       </thead>
       <tbody>
-      {#each list as { future, rate, time, accum1, accum3, accum7, accum14 }}
+      {#each list as { future, rate, time }}
         <tr>
           <th
             class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
@@ -97,31 +98,13 @@
               { future }
             </span>
           </th>
+          {#each times as t}
           <td
             class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
           >
-            { (rate * 100).toFixed(4) }%
+            { t === time ? `${(rate * 100).toFixed(4)}%` : '-' }
           </td>
-          <td
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
-            >
-            { (accum1 * 100).toFixed(4) }%
-          </td>
-          <td
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
-            >
-            { (accum3 * 100).toFixed(4) }%
-          </td>
-          <td
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
-            >
-            { (accum7 * 100).toFixed(4) }%
-          </td>
-          <td
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
-            >
-            { (accum14 * 100).toFixed(4) }%
-          </td>
+          {/each}
         </tr>
       {/each}
       </tbody>

@@ -12,5 +12,6 @@
 <Router url="{url}">
   <Route path="/" component="{Gaps}" />
   <Route path="/funfee" component="{FunFee}" />
+  <Route path="/funfee/:id" component="{FunFee}" />
   <Route path="/diff" component="{Diff}" />
 </Router>
