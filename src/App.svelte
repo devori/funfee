@@ -5,12 +5,11 @@
   import Diff from "./views/Diff.svelte";
   import FunFee from "./views/FunFee.svelte";
   import Gaps from "./views/Gaps.svelte";
-
-  export let url = "";
+  import Transfer from "./views/Transfer.svelte";
 </script>
 
-<Router url="{url}">
-  <Route path="/" component="{Gaps}" />
+<Router>
+  <Route path="/transfer/:id" component="{Transfer}" />
   <Route path="/funfee" component="{FunFee}" />
   <Route path="/funfee/:id" component="{FunFee}" />
   <Route path="/diff" component="{Diff}" />
