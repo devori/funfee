@@ -45,8 +45,8 @@
     const tickers = await upbitApi.getOrderBooks(arr.map(({ krw }) => krw));
     list = arr.map(({ coin, usd }) => ({
       coin, usd, krw: tickers[coin],
-      usdTokrw: (tickers[coin].bid / usd.ask).toFixed(),
-      krwToUsd: (tickers[coin].ask / usd.bid).toFixed(),
+      usdTokrw: (tickers[coin].bid / usd.ask),
+      krwToUsd: (tickers[coin].ask / usd.bid),
     }));
   }
   refresh();
@@ -108,7 +108,7 @@
               <div
                   class="ml-3 flex font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'} flex justify-center"
               >
-                { coin } ({ usdTokrw })
+                { coin } ({ usdTokrw.toFixed() })
               </div>
               <div>
                 <div class="flex justify-center">$ { usd.ask.toFixed(4) }</div>
@@ -141,7 +141,7 @@
               <div
                   class="ml-3 flex font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'} flex justify-center"
               >
-                { coin } ({ krwToUsd })
+                { coin } ({ krwToUsd.toFixed() })
               </div>
               <div>
                 <div class="flex justify-center">$ { usd.bid.toFixed(4) }</div>

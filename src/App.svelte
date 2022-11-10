@@ -4,7 +4,6 @@
 
   import Diff from "./views/Diff.svelte";
   import FunFee from "./views/FunFee.svelte";
-  import Gaps from "./views/Gaps.svelte";
   import Transfer from "./views/Transfer.svelte";
 </script>
 
