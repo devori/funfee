@@ -1,7 +1,7 @@
 import App from "./App.svelte";
 
 if (location.pathname === '/' || location.pathname === '') {
-  location.href = '/transfer/ftx';
+  location.href = '/transfer/bybit';
 }
 
 const app = new App({

@@ -1,4 +1,5 @@
 <script>
+  import * as binanceApi from "../apis/binance-api";
   import * as bybitApi from "../apis/bybit-api";
   import * as ftxApi from "../apis/ftx-api";
   import * as upbitApi from "../apis/upbit-api";
@@ -7,8 +8,9 @@
   export let color = "light";
 
   const stores = [
-    { value: 'ftx', text: 'FTX' },
     { value: 'bybit', text: 'Bybit' },
+    { value: 'binance', text: 'Binance' },
+    { value: 'ftx', text: 'Ftx' },
   ];
 
   let sort = { field: 'usdTokrw' };
@@ -35,6 +37,8 @@
       usdMarkets = await ftxApi.getMarkets();
     } else if (id === 'bybit') {
       usdMarkets = await bybitApi.getMarkets();
+    } else if (id === 'binance') {
+      usdMarkets = await binanceApi.getMarkets();
     }
     krwMarkets = await upbitApi.getMarkets();
     const arr = krwMarkets.filter(({ coin }) => usdMarkets[coin]).map((u) => ({
