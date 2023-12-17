@@ -11,5 +11,5 @@
   <Route path="/transfer/:id" component="{Transfer}" />
   <Route path="/funfee" component="{FunFee}" />
   <Route path="/funfee/:id" component="{FunFee}" />
-  <Route path="/diff" component="{Diff}" />
+  <Route path="/diff/:id" component="{Diff}" />
 </Router>

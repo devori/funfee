@@ -11,6 +11,10 @@ export async function getMarkets() {
 }
 
 export async function getOrderBooks(markets) {
+  if (!markets) {
+    const arr = await getMarkets();
+    markets = arr.map(({ market }) => market);
+  }
   const { data } = await axios.get(`${BASE_URL}/orderbook`, {
     params: {
       markets: markets.join(','),

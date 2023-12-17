@@ -1,38 +1,54 @@
 <script>
-  import * as ftxApi from "../apis/ftx-api";
   import * as bybitApi from "../apis/bybit-api";
+  import * as upbitApi from "../apis/upbit-api";
 
-  let futures = {};
-  let sortBy = { direction: false, by: 'diff' };
+  export let id;
+  export let color = "light";
+
+  let result = [];
+  let sortBy = { direction: true, by: 'upbit' };
+  
+  const stores = [
+    { value: 'bybit', text: 'Bybit' },
+    { value: 'binance', text: 'Binance' },
+  ];
 
   $:
-    list = Object.values(futures)
-            .filter(({ ftx, bybit }) => ftx && bybit)
-            .map(({ name, ftx, bybit }) => ({ name, ftx, bybit, diff: 1 - (ftx.ask / bybit.ask) }))
-            .sort((r1, r2) => ((r1[sortBy.by] < r2[sortBy.by]) ? -1 : 1) * (sortBy.direction ? 1 : -1));
+    list = result.sort((r1, r2) => {
+      if (r1[sortBy.by] === null) return 1;
+      if (r2[sortBy.by] === null) return -1;
+      return ((r1[sortBy.by] < r2[sortBy.by]) ? -1 : 1) * (sortBy.direction ? 1 : -1);
+    });
 
   function onClickSort(by) {
     sortBy = { by, direction: sortBy.by === by ? !sortBy.direction : false };
   }
 
   async function refresh() {
-    const ftxData = await ftxApi.getFutures();
-    futures = ftxData.reduce((r, { name, ...ftx }) => {
-      r[name] = { name, ftx };
-      return r;
-    }, {});
+    let futures = []
+    if (id === 'bybit') {
+      futures = await bybitApi.getFutures();
+    }
 
-    const bybitData = await bybitApi.getFutures();
-    futures = bybitData.reduce((r, { name, ...bybit }) => {
-      r[name] = r[name] ?? { name };
-      r[name].bybit = bybit;
-      return r;
-    }, futures);
+    const bybitMarkets = await bybitApi.getMarkets();
+    const upbitMarkets = await upbitApi.getOrderBooks();
+
+    result = futures.filter(({ name }) => bybitMarkets[name] || upbitMarkets[name])
+      .map(({ name, ask }) => {
+        return {
+          name,
+          future: ask,
+          bybit: bybitMarkets[name] ? (bybitMarkets[name].ask / ask) : null,
+          upbit: upbitMarkets[name] ? (upbitMarkets[name].ask / ask) : null,
+        }
+      });
   }
 
   refresh();
 
-  export let color = "light";
+  const onChangeStore = ({ target: { value } }) => {
+    location.href = `/funfee/${value}`;
+  };
 </script>
 
 <div
@@ -44,9 +60,15 @@
         <h3
           class="font-semibold text-lg {color === 'light' ? 'text-blueGray-700' : 'text-white'}"
         >
-          FTX - Bybit Diff
+          Future - Market
         </h3>
       </div>
+      <select bind:value="{id}" on:change="{onChangeStore}">
+        <option value="">Select</option>
+        {#each stores as s}
+          <option value="{s.value}">{s.text}</option>
+        {/each}
+      </select>
     </div>
   </div>
   <div class="block w-full overflow-x-auto">
@@ -62,24 +84,25 @@
           </th>
           <th
             class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
-            on:click={() => onClickSort('diff')}
           >
-            Diff(%)
+            Future ({ stores.find(({ value }) => value === id).text })
           </th>
           <th
             class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            on:click={() => onClickSort('bybit')}
           >
-            FTX-perp
+            Bybit
           </th>
           <th
             class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            on:click={() => onClickSort('upbit')}
           >
-            Bybit-perp
+            Upbit
           </th>
         </tr>
       </thead>
       <tbody>
-      {#each list as { name, diff, ftx, bybit }}
+      {#each list as { name, future, bybit, upbit }}
         <tr>
           <th
             class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
@@ -93,17 +116,17 @@
           <td
             class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
           >
-            { ((diff) * 100).toFixed(1) }%
+            { future }
           </td>
           <td
             class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
             >
-            { ftx?.ask }
+            { bybit ? (bybit * 100).toFixed(2) : '-' }%
           </td>
           <td
             class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
             >
-            { bybit?.ask }
+            { upbit ? upbit.toFixed(0) : '-' }
           </td>
         </tr>
       {/each}

@@ -6,8 +6,8 @@
   export let color = "light";
 
   const stores = [
-    { value: 'ftx', text: 'FTX' },
     { value: 'bybit', text: 'Bybit' },
+    { value: 'ftx', text: 'FTX' },
   ];
   let rates = [];
   let sortBy = { asc: false, time: '' };
