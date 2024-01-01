@@ -1,12 +1,14 @@
 <script>
   import {getRates as getRatesForFtx} from "../apis/ftx-api";
   import {getRates as getRatesForBybit} from "../apis/bybit-api";
+  import {getRates as getRatesForBinance} from "../apis/binance-api";
 
   export let id;
   export let color = "light";
 
   const stores = [
     { value: 'bybit', text: 'Bybit' },
+    { value: 'binance', text: 'Binance' },
     { value: 'ftx', text: 'FTX' },
   ];
   let rates = [];
@@ -31,6 +33,9 @@
         break;
       case 'bybit':
         rates = (await getRatesForBybit()).map((r) => ({ ...r, future: r.future.replace('USDT', '') }));
+        break;
+      case 'binance':
+        rates = (await getRatesForBinance()).map((r) => ({ ...r, future: r.future.replace('USDT', '') }));
         break;
       default:
         break;

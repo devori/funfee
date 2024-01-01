@@ -1,5 +1,6 @@
 <script>
   import * as bybitApi from "../apis/bybit-api";
+  import * as binanceApi from "../apis/binance-api";
   import * as upbitApi from "../apis/upbit-api";
 
   export let id;
@@ -28,10 +29,18 @@
     let futures = []
     if (id === 'bybit') {
       futures = await bybitApi.getFutures();
+    } else if (id === 'binance') {
+      futures = await binanceApi.getFutures();
+    } else {
+      alert(`Not supported future exchange: ${id}`);
+      return;
     }
 
     const bybitMarkets = await bybitApi.getMarkets();
+    const binanceMarkets = await binanceApi.getMarkets();
     const upbitMarkets = await upbitApi.getOrderBooks();
+
+    console.log(binanceMarkets);
 
     result = futures.filter(({ name }) => bybitMarkets[name] || upbitMarkets[name])
       .map(({ name, ask }) => {
@@ -39,6 +48,7 @@
           name,
           future: ask,
           bybit: bybitMarkets[name] ? (bybitMarkets[name].ask / ask) : null,
+          binance: binanceMarkets[name] ? (binanceMarkets[name].ask / ask) : null,
           upbit: upbitMarkets[name] ? (upbitMarkets[name].ask / ask) : null,
         }
       });
@@ -47,7 +57,7 @@
   refresh();
 
   const onChangeStore = ({ target: { value } }) => {
-    location.href = `/funfee/${value}`;
+    location.href = `/diff/${value}`;
   };
 </script>
 
@@ -77,24 +87,32 @@
       <thead>
         <tr>
           <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            class="px-2 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
             on:click={() => onClickSort('name')}
           >
             Coin
           </th>
           <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            class="px-2 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
           >
-            Future ({ stores.find(({ value }) => value === id).text })
+            Future
+            <br />
+            ({ stores.find(({ value }) => value === id).text })
           </th>
           <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            class="px-2 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
             on:click={() => onClickSort('bybit')}
           >
             Bybit
           </th>
           <th
-            class="px-3 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            class="px-2 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
+            on:click={() => onClickSort('binance')}
+          >
+            Binance
+          </th>
+          <th
+            class="px-2 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left {color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-red-700 text-red-200 border-red-600'}"
             on:click={() => onClickSort('upbit')}
           >
             Upbit
@@ -102,10 +120,10 @@
         </tr>
       </thead>
       <tbody>
-      {#each list as { name, future, bybit, upbit }}
+      {#each list as { name, future, bybit, binance, upbit }}
         <tr>
           <th
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
+            class="border-t-0 px-2 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left flex items-center"
           >
             <span
               class="ml-3 font-bold {color === 'light' ? 'btext-blueGray-600' : 'text-whit'}"
@@ -114,17 +132,22 @@
             </span>
           </th>
           <td
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+            class="border-t-0 px-2 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
           >
             { future }
           </td>
           <td
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+            class="border-t-0 px-2 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
             >
             { bybit ? (bybit * 100).toFixed(2) : '-' }%
           </td>
           <td
-            class="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+            class="border-t-0 px-2 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
+            >
+            { binance ? (binance * 100).toFixed(2) : '-' }%
+          </td>
+          <td
+            class="border-t-0 px-2 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
             >
             { upbit ? upbit.toFixed(0) : '-' }
           </td>
