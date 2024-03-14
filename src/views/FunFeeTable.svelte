@@ -58,7 +58,6 @@
         upbit: upbitMap[r.future],
       },
     }));
-    console.log(rates);
 
     await Promise.resolve();
     onClickSortByTime(times?.[0] ?? ''); 
