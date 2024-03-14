@@ -40,8 +40,6 @@
     const binanceMarkets = await binanceApi.getMarkets();
     const upbitMarkets = await upbitApi.getOrderBooks();
 
-    console.log(binanceMarkets);
-
     result = futures.filter(({ name }) => bybitMarkets[name] || upbitMarkets[name])
       .map(({ name, ask }) => {
         return {

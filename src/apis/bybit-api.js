@@ -45,6 +45,5 @@ export async function getMarkets() {
 
 export async function getRates() {
   const { data: { body } } = await axios.get(`${BASE_URL}/bybit/funding-rates`);
-  console.log(body);
   return body;
 }
