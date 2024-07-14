@@ -9,7 +9,7 @@ async function callFtxApi(method, path) {
 
       res.on('end', () => {
           const r = JSON.parse(Buffer.concat(data).toString());
-          resolve({ state, result: r.result });
+          resolve({ result: r.result });
       });
     })
   });
@@ -17,8 +17,9 @@ async function callFtxApi(method, path) {
 
 async function callBybitApi(method, path) {
   const https = require('https');
+  const query = path.startsWith('/v5') ? '?category=linear' : ''
   return new Promise((resolve) => {
-    https[method](`https://api.bybit.com${path}`, res => {
+    https[method](`https://api.bybit.com${path}${query}`, res => {
       let data = [];
       res.on('data', chunk => {
           data.push(chunk);
@@ -26,7 +27,7 @@ async function callBybitApi(method, path) {
 
       res.on('end', () => {
           const r = JSON.parse(Buffer.concat(data).toString());
-          resolve({ state, result: r.result });
+          resolve({ result: r.result.list });
       });
     })
   });
@@ -42,6 +43,6 @@ exports.handler = async (event) => {
   }
   return {
     statusCode: 200,
-    body: rates,
+    body: result,
   };
 };

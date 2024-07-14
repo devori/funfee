@@ -1,29 +1,33 @@
 async function callApi(path, query, state) {
   const https = require('https');
   return new Promise((resolve) => {
-    https.get(`https://api.bybit.com/v2/public/${path}${query ? `?${query}` : ''}`, res => {
+    https.get(`https://api.bybit.com/v5/market/${path}${query ? `?${query}` : ''}`, res => {
       let data = [];
       res.on('data', chunk => {
           data.push(chunk);
       });
 
       res.on('end', () => {
-          const r = JSON.parse(Buffer.concat(data).toString());
-          resolve({ state, result: r.result });
+          try {
+            const r = JSON.parse(Buffer.concat(data).toString());
+            resolve({ state, result: r.result.list }); 
+          } catch (e) {
+            resolve({ state, result: [] });
+          }
       });
     })
   });
 }
 
 async function getRates() {
-  const list = await callApi('symbols');
-  const futures = list.result.filter(r => r.name === r.alias && r.quote_currency === 'USDT');
+  const r = await callApi('instruments-info', 'category=linear');
+  const futures = r.result.filter(row => row.contractType === 'LinearPerpetual' && row.quoteCoin === 'USDT');
   
   const rates = [];
-  for await (const { state: { name }, result } of futures.map(({ name }) => callApi('tickers', `symbol=${name}`, { name }))) {
-    const [d] = result.filter(({ symbol }) => symbol === name);
+  for await (const { state: { symbol }, result } of futures.map(({ symbol }) => callApi('tickers', `category=linear&symbol=${symbol}`, { symbol }))) {
+    const [d] = result.filter((row) => row.symbol === symbol);
     if (!d) continue;
-    rates.push({ future: d.symbol, rate: Number(d.funding_rate), time: d.next_funding_time, history: [] })
+    rates.push({ future: d.symbol, rate: Number(d.fundingRate), time: Number(d.nextFundingTime), history: [] })
   }
   return rates;
 }

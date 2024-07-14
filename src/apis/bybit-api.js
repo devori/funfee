@@ -6,9 +6,9 @@ export async function getFutures() {
   const { data: { body: { result } } } = await axios.post(`${BASE_URL}/proxy`, {
     market: 'bybit',
     method: 'get',
-    path: '/v2/public/tickers',
+    path: '/v5/market/tickers',
   });
-  return result.filter(({ symbol }) => symbol.endsWith('USDT')).map(({ symbol, ask_price, bid_price, volume_24h }) => ({ name: symbol.replace('USDT', ''), ask: ask_price, bid: bid_price, volume: volume_24h }));
+  return result.filter(({ symbol }) => symbol.endsWith('USDT')).map(({ symbol, ask1Price, bid1Price, volume24h }) => ({ name: symbol.replace('USDT', ''), ask: Number(ask1Price), bid: Number(bid1Price), volume: Number(volume24h) }));
 }
 
 export async function getMarkets() {
@@ -17,7 +17,7 @@ export async function getMarkets() {
     method: 'get',
     path: '/spot/v3/public/quote/ticker/bookTicker',
   });
-  const list = result.list.map(({ askPrice, bidPrice, symbol }) => {
+  const list = result.map(({ askPrice, bidPrice, symbol }) => {
     let coin;
     let base;
     if (symbol.endsWith('USDT')) {
