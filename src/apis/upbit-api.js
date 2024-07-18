@@ -1,8 +1,15 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://api.upbit.com/v1';
+const BASE_URL = 'https://xrmxuo2hf1.execute-api.ap-northeast-2.amazonaws.com/prod';
+
 export async function getMarkets() {
-  const { data } = await axios.get(`${BASE_URL}/market/all`);
+  const r = await axios.post(`${BASE_URL}/proxy`, {
+    market: 'upbit',
+    method: 'get',
+    path: '/v1/market/all',
+  });
+  const data  = r.data.body.result;
+
   return data.filter(({ market }) => market.startsWith('KRW-'))
     .map(({ market }) => {
       const [base, coin] = market.split('-');
@@ -15,11 +22,13 @@ export async function getOrderBooks(markets) {
     const arr = await getMarkets();
     markets = arr.map(({ market }) => market);
   }
-  const { data } = await axios.get(`${BASE_URL}/orderbook`, {
-    params: {
-      markets: markets.join(','),
-    },
+
+  const r = await axios.post(`${BASE_URL}/proxy`, {
+    market: 'upbit',
+    method: 'get',
+    path: `/v1/orderbook?markets=${markets.join(',')}`,
   });
+  const data  = r.data.body.result;
 
   return data.reduce((s, { market, orderbook_units }) => {
     const [, coin] = market.split('-');

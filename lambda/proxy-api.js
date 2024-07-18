@@ -33,6 +33,23 @@ async function callBybitApi(method, path) {
   });
 }
 
+async function callUpbitApi(method, path) {
+  const https = require('https');
+  return new Promise((resolve) => {
+    https[method](`https://api.upbit.com${path}`, res => {
+      let data = [];
+      res.on('data', chunk => {
+          data.push(chunk);
+      });
+
+      res.on('end', () => {
+          const r = JSON.parse(Buffer.concat(data).toString());
+          resolve({ result: r });
+      });
+    })
+  });
+}
+
 exports.handler = async (event) => {
   const { method, path, market = 'ftx' } = event;
   let result;
@@ -40,6 +57,8 @@ exports.handler = async (event) => {
     result = await callFtxApi(method, path);
   } else if (market === 'bybit') {
     result = await callBybitApi(method, path);
+  } else if (market === 'upbit') {
+    result = await callUpbitApi(method, path);
   }
   return {
     statusCode: 200,
