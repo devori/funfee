@@ -17,9 +17,8 @@ async function callFtxApi(method, path) {
 
 async function callBybitApi(method, path) {
   const https = require('https');
-  const query = path.startsWith('/v5') ? '?category=linear' : ''
   return new Promise((resolve) => {
-    https[method](`https://api.bybit.com${path}${query}`, res => {
+    https[method](`https://api.bybit.com${path}`, res => {
       let data = [];
       res.on('data', chunk => {
           data.push(chunk);

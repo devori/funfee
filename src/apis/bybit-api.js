@@ -6,7 +6,7 @@ export async function getFutures() {
   const { data: { body: { result } } } = await axios.post(`${BASE_URL}/proxy`, {
     market: 'bybit',
     method: 'get',
-    path: '/v5/market/tickers',
+    path: '/v5/market/tickers?category=linear',
   });
   return result.filter(({ symbol }) => symbol.endsWith('USDT')).map(({ symbol, ask1Price, bid1Price, volume24h }) => ({ name: symbol.replace('USDT', ''), ask: Number(ask1Price), bid: Number(bid1Price), volume: Number(volume24h) }));
 }
@@ -15,9 +15,9 @@ export async function getMarkets() {
   const { data: { body: { result } } } = await axios.post(`${BASE_URL}/proxy`, {
     market: 'bybit',
     method: 'get',
-    path: '/spot/v3/public/quote/ticker/bookTicker',
+    path: '/v5/market/tickers?category=spot',
   });
-  const list = result.map(({ askPrice, bidPrice, symbol }) => {
+  const list = result.map(({ ask1Price, bid1Price, symbol }) => {
     let coin;
     let base;
     if (symbol.endsWith('USDT')) {
@@ -29,8 +29,8 @@ export async function getMarkets() {
     }
     return {
       market: symbol,
-      ask: Number(askPrice),
-      bid: Number(bidPrice),
+      ask: Number(ask1Price),
+      bid: Number(bid1Price),
       coin,
       type: 'spot',
       base,
